@@ -16,6 +16,7 @@ class SP(nn.Module):
 
 	def forward(self, fm_s, fm_t):
 		fm_s = fm_s.view(fm_s.size(0), -1)
+		# gram matrix
 		G_s  = torch.mm(fm_s, fm_s.t())
 		norm_G_s = F.normalize(G_s, p=2, dim=1)
 

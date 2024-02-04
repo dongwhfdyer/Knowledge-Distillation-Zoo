@@ -25,9 +25,9 @@ class AT(nn.Module):
 		return loss
 
 	def attention_map(self, fm, eps=1e-6):
-		am = torch.pow(torch.abs(fm), self.p)
-		am = torch.sum(am, dim=1, keepdim=True)
+		am = torch.pow(torch.abs(fm), self.p) # normally am's shape is (batch_size, num_channels, height, width)
+		am = torch.sum(am, dim=1, keepdim=True) # summing along channel dimension
 		norm = torch.norm(am, dim=(2,3), keepdim=True)
-		am = torch.div(am, norm+eps)
+		am = torch.div(am, norm+eps) # (batch_size, 1, height, width)
 
 		return am

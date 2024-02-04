@@ -42,8 +42,24 @@ class RKD(nn.Module):
 	def rkd_angle(self, feat_s, feat_t):
 		# N x C --> N x N x C
 		feat_t_vd = (feat_t.unsqueeze(0) - feat_t.unsqueeze(1))
+		"""
+		The line of code feat_t_vd = (feat_t.unsqueeze(0) - feat_t.unsqueeze(1)) in the RKD class of the
+		 file kd_losses/rkd.py is creating a tensor feat_t_vd that contains the pairwise differences between the
+		  vectors in the teacher feature map feat_t.
+
+The unsqueeze() function is used to add a new dimension to the tensor along the specified axis. 
+In this case, feat_t.unsqueeze(0) adds a new dimension at the beginning of the tensor, which has the effect of
+ creating a new tensor with shape (1, N, C), where N is the number of vectors in the feature map 
+ and C is the dimensionality of each vector. Similarly, feat_t.unsqueeze(1) adds a new dimension after the 
+ first dimension, which has the effect of creating a new tensor with shape (N, 1, C).
+
+Subtracting these two tensors creates a new tensor with shape (N, N, C), where each element (i, j, :) 
+contains the difference between the vectors feat_t[i, :] and feat_t[j, :]. This tensor is then used to
+ calculate the cosine similarity between the vectors in feat_t by normalizing it and taking the dot product 
+ with its transpose, as explained in my previous response.
+		"""
 		norm_feat_t_vd = F.normalize(feat_t_vd, p=2, dim=2)
-		feat_t_angle = torch.bmm(norm_feat_t_vd, norm_feat_t_vd.transpose(1, 2)).view(-1)
+		feat_t_angle = torch.bmm(norm_feat_t_vd, norm_feat_t_vd.transpose(1, 2)).view(-1) # shape: (N,N, )
 
 		feat_s_vd = (feat_s.unsqueeze(0) - feat_s.unsqueeze(1))
 		norm_feat_s_vd = F.normalize(feat_s_vd, p=2, dim=2)
@@ -54,6 +70,10 @@ class RKD(nn.Module):
 		return loss
 
 	def pdist(self, feat, squared=False, eps=1e-12):
+		"""
+		it calculates distance between each vector in the feature map.
+		return feat_dist with shape of (feat_dim, feat_dim)
+		"""
 		feat_square = feat.pow(2).sum(dim=1)
 		feat_prod   = torch.mm(feat, feat.t())
 		feat_dist   = (feat_square.unsqueeze(0) + feat_square.unsqueeze(1) - 2 * feat_prod).clamp(min=eps)
